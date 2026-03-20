@@ -32,6 +32,10 @@ Issues = "https://github.com/joaotavora/rassumfrassum/issues"
 [project.scripts]
 rass = "rassumfrassum.main:main"
 
+dependencies = [
+    "orjson>=3.11.7",
+]
+
 [tool.basedpyright]
 typeCheckingMode = "standard"
 pythonVersion = "3.13"

@@ -5,12 +5,14 @@ rassumfrassum - A simple LSP multiplexer that forwards JSONRPC messages.
 import argparse
 import asyncio
 import importlib
-import json
 import os
 import sys
 import traceback
 from dataclasses import dataclass, field
 from typing import cast
+
+# import json
+import orjson as json
 
 from .frassum import DirectResponse, PayloadItem, Server
 from .json import JSON
@@ -74,7 +76,9 @@ def log_message(direction: str, message: JSON, method: str) -> None:
         prefix += f"[{id}]"
 
     # Format: [timestamp] --> method_name {...json...}
-    event(f"{direction} {prefix} {json.dumps(message, ensure_ascii=False)}")
+    # json_str = json.dumps(message, ensure_ascii=False)
+    json_str = json.dumps(message).decode('utf8')
+    event(f"{direction} {prefix} {json_str}")
 
 
 async def forward_server_stderr(proc: InferiorProcess) -> None:
