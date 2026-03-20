@@ -11,15 +11,10 @@ from . import __version__
 from .preset import load_preset
 from .rassum import run_multiplexer
 from .util import (
+    LogLevel,
     log,
     set_log_level,
     set_max_log_length,
-    LOG_SILENT,
-    LOG_WARN,
-    LOG_INFO,
-    LOG_DEBUG,
-    LOG_EVENT,
-    LOG_TRACE,
 )
 
 
@@ -123,15 +118,8 @@ def main(argv=None) -> None:
     opts = parser.parse_args(rass_args)
 
     # Set log level based on argument
-    log_level_map = {
-        'silent': LOG_SILENT,
-        'warn': LOG_WARN,
-        'info': LOG_INFO,
-        'event': LOG_EVENT,
-        'debug': LOG_DEBUG,
-        'trace': LOG_TRACE,
-    }
-    set_log_level(log_level_map[opts.log_level])
+    log_level_map = LogLevel.__members__
+    set_log_level(log_level_map[opts.log_level.upper()])
     set_max_log_length(opts.max_log_length)
 
     # Load preset if specified

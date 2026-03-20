@@ -1,21 +1,23 @@
-from datetime import datetime
 import sys
+from datetime import datetime
+from enum import IntEnum
 
 # Type aliases for presets
 ServerCommand = list[str]
 ServerCommands = list[ServerCommand]
 PresetResult = tuple[ServerCommands, type | None]
 
-# Log levels (lower number = higher priority)
-LOG_SILENT = 0
-LOG_WARN = 1
-LOG_INFO = 2
-LOG_EVENT = 3
-LOG_DEBUG = 4
-LOG_TRACE = 5
+class LogLevel(IntEnum):
+    # lower number = higher priority
+    SILENT = 0
+    WARN = 1
+    INFO = 2
+    EVENT = 3  # DEFAULT  rassum
+    DEBUG = 4  # rassum (aggregator) / frassum (LSP)
+    TRACE = 5  # unused
 
 # Global settings
-_current_log_level = LOG_EVENT
+_current_log_level = LogLevel.EVENT
 _max_log_length = 4000
 
 def set_log_level(level: int) -> None:
@@ -48,23 +50,23 @@ def _log(prefix: str, s: str, min_level: int) -> None:
 
 def info(s: str):
     """Log info-level message (high-level events, lifecycle)."""
-    _log("i", s, LOG_INFO)
+    _log("i", s, LogLevel.INFO)
 
 def debug(s: str):
     """Log debug-level message (method names, routing decisions)."""
-    _log("d", s, LOG_DEBUG)
+    _log("d", s, LogLevel.DEBUG)
 
 def trace(s: str):
     """Log trace-level message (full protocol details)."""
-    _log("t", s, LOG_TRACE)
+    _log("t", s, LogLevel.TRACE)
 
 def warn(s: str):
     """Log warning message."""
-    _log("W", "WARN: " + s, LOG_WARN)
+    _log("W", "WARN: " + s, LogLevel.WARN)
 
 def event(s: str):
     """Log JSONRPC protocol event."""
-    _log("e", s, LOG_EVENT)
+    _log("e", s, LogLevel.EVENT)
 
 # Alias for backward compatibility
 log = info
