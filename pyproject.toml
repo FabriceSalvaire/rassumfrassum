@@ -36,6 +36,13 @@ dependencies = [
     "orjson>=3.11.7",
 ]
 
+# [dependency-groups]
+# dev = [
+#     "rassumfrassum>=0.3.3",
+#     "ruff>=0.15.2",
+#     "ty>=0.0.18",
+# ]
+
 [tool.basedpyright]
 typeCheckingMode = "standard"
 pythonVersion = "3.13"

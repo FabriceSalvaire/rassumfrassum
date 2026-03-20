@@ -112,6 +112,7 @@ class LspLogic:
             List of servers that should receive the request, or
             DirectResponse to send immediately without forwarding
         """
+        # Fixme: we could use a match for simple cases a case _ for complex elif
         # Check for data recovery from stash
         if method.endswith("resolve") and (
             stashed := self.stash.get(cast(int, params.get('data')))
@@ -616,6 +617,7 @@ class LspLogic:
             def t1sync(x):
                 return x == 1 or (isinstance(x, dict) and x.get("change") == 1)
 
+            # Fixme: use or
             if res.get(cap) is None:
                 res[cap] = newval
             elif cap == 'textDocumentSync' and t1sync(newval):
@@ -841,6 +843,6 @@ def _uri_matches_pattern(uri: str, pattern: str) -> bool:
 
     try:
         return posix_path.match(pattern)
-    except Exception:
+    except Exception:  # Fixme: ValueError ?
         # Pattern matching error - be conservative and forward
         return True
