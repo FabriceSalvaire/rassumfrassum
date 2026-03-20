@@ -20,7 +20,9 @@ from .util import (
 )
 
 
-@dataclass
+# https://docs.python.org/3/reference/datamodel.html#object.__slots__
+#   ??? Attribute lookup speed can be significantly improved as well
+@dataclass(slots=True)
 class Server:
     """Information about a logical LSP server."""
 
@@ -29,7 +31,7 @@ class Server:
     cookie: object = None
 
 
-@dataclass
+@dataclass(slots=True)
 class DocumentState:
     """State for tracking diagnostics for a document."""
 
@@ -47,7 +49,7 @@ class DocumentState:
     )  # server_id -> previousResultId
 
 
-@dataclass
+@dataclass(slots=True)
 class PayloadItem:
     """A payload item for aggregation."""
 
@@ -56,7 +58,7 @@ class PayloadItem:
     is_error: bool
 
 
-@dataclass
+@dataclass(slots=True)
 class DirectResponse:
     """A direct response payload to send immediately without forwarding."""
 

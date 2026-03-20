@@ -54,7 +54,7 @@ class InferiorProcess:
         return self.server.name
 
 
-@dataclass
+@dataclass(slots=True)
 class AggregationState:
     """State for tracking an ongoing message aggregation."""
 
