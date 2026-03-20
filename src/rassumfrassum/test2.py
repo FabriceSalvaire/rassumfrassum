@@ -8,8 +8,9 @@ import os
 import sys
 from typing import Callable, cast
 
-from .json import JSON, read_message, write_message, read_message_sync, write_message_sync
+from .json import JSON, read_message, write_message, write_message_sync
 from .stdio import create_stdin_reader, create_stdout_writer
+
 
 def log(who: str, msg: str) -> None:
     """Log to stderr."""
@@ -41,7 +42,7 @@ class LspTestEndpoint:
         self._next_id = 1
 
     @staticmethod
-    async def create(name : str = "client") -> 'LspTestEndpoint':
+    async def create(name: str = "client") -> 'LspTestEndpoint':
         """Create an LSP test endpoint connected to stdin/stdout."""
         reader = await create_stdin_reader()
         writer = await create_stdout_writer()
@@ -121,7 +122,7 @@ class LspTestEndpoint:
                 log(self.name, f"Skipping server response: {msg}")
                 continue
 
-            if  msg["method"] == method:
+            if msg["method"] == method:
                 return (msg["id"], cast(JSON, msg.get('params')))
             log(self.name, f"Skipping uninteresting request: {msg}")
 
@@ -245,7 +246,7 @@ async def _run_toy_server_async(
     raw_request_handlers: 'dict[str, Callable[[int, JSON | None, Callable[[JSON], None]], None]]'
 ) -> None:
     """Internal async implementation of toy LSP server."""
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_event_loop()  # noqa: F841
 
     # Setup async stdin/stdout using cross-platform functions
     reader = await create_stdin_reader()
@@ -284,8 +285,10 @@ async def _run_toy_server_async(
                 if method in raw_request_handlers:
                     # Raw handler - it will send messages itself
                     handler = raw_request_handlers[method]
+
                     def send_msg(msg: JSON):
                         write_message_sync(msg)
+
                     handler(msg_id, params, send_msg)
                 elif method in request_handlers:
                     handler = request_handlers[method]

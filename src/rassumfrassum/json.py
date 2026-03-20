@@ -6,7 +6,7 @@ LSP uses HTTP-style headers: Content-Length: N\r\n\r\n{json}
 import json
 import asyncio
 import sys
-from typing import BinaryIO, cast, Any
+from typing import Any, BinaryIO, cast
 
 JSON = dict[str, Any]
 
@@ -77,7 +77,7 @@ def read_message_sync(stream: BinaryIO | None = None) -> JSON | None:
     return cast(JSON, json.loads(content.decode('utf-8')))
 
 
-def write_message_sync(message: JSON, stream : BinaryIO | None = None) -> None:
+def write_message_sync(message: JSON, stream: BinaryIO | None = None) -> None:
     """
     Write a single JSONRPC message to stdout (or provided stream) synchronously.
     """

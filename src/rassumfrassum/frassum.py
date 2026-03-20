@@ -11,11 +11,11 @@ from urllib.parse import unquote, urlparse
 
 from .json import JSON
 from .util import (
-    dmerge,
-    is_scalar,
     debug,
-    info,
+    dmerge,
     expand_braces,
+    info,
+    is_scalar,
 )
 
 
@@ -39,7 +39,7 @@ class DocumentState:
     inflight_pushes: dict[int, list] = field(
         default_factory=dict
     )  # server_id -> diagnostics
-    push_diags_timer: Optional[asyncio.Task] = None
+    push_diags_timer: asyncio.Task | None = None
     push_dispatched: bool = False
     inflight_pulls: dict[int, str | int] = field(
         default_factory=dict
@@ -228,7 +228,7 @@ class LspLogic:
             for server in self.servers.values():
                 await self.notify_server(server, method, params)
 
-        def reset_state(uri: str, version: Optional[int]):
+        def reset_state(uri: str, version: int | None):
             """Reset document state. If version is None, close the document."""
             if state := self.document_state.get(uri):
                 if state.push_diags_timer:

@@ -60,7 +60,6 @@ def main(argv=None) -> None:
     Parse arguments and start the multiplexer.
     """
     if argv is None:
-        import sys
         argv = sys.argv[1:]
 
     # Parse multiple '--' separators for multiple servers

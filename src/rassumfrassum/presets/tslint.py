@@ -1,11 +1,11 @@
 """TypeScript preset: typescript-language-server + eslint-language-server."""
 
 import os
+from typing import Any, cast
 
 from rassumfrassum.frassum import LspLogic, Server
 from rassumfrassum.json import JSON
 from rassumfrassum.util import dmerge, info
-from typing import cast, Any
 
 
 def _find_workspace_folder(scope_uri: str) -> dict | None:

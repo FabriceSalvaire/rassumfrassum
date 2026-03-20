@@ -87,7 +87,7 @@ def _load_preset_from_bundle(name: str) -> Any:
     # Find the presets subpackage location
     presets_spec = importlib.util.find_spec('rassumfrassum.presets')
     if presets_spec is None or presets_spec.origin is None:
-        raise FileNotFoundError(f"Cannot find rassumfrassum.presets package")
+        raise FileNotFoundError("Cannot find rassumfrassum.presets package")
 
     presets_dir = os.path.dirname(presets_spec.origin)
     preset_path = os.path.join(presets_dir, f'{name}.py')

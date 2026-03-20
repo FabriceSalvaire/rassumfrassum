@@ -10,20 +10,14 @@ import os
 import sys
 import traceback
 from dataclasses import dataclass, field
-from typing import Optional, cast
+from typing import cast
 
 from .frassum import DirectResponse, PayloadItem, Server
-from .json import (
-    JSON,
-)
-from .json import (
-    read_message as read_lsp_message,
-)
-from .json import (
-    write_message as write_lsp_message,
-)
-from .util import event, log, warn, debug
+from .json import JSON
+from .json import read_message as read_lsp_message
+from .json import write_message as write_lsp_message
 from .stdio import create_stdin_reader, create_stdout_writer
+from .util import debug, event, log, warn
 
 # JSONRPC request IDs can be strings or integers
 ReqId = str | int
@@ -69,7 +63,7 @@ class AggregationState:
     method: str
     aggregate: dict[int, PayloadItem]
     dispatched: bool | str = False
-    timeout_task: Optional[asyncio.Task] = field(default=None)
+    timeout_task: asyncio.Task | None = field(default=None)
 
 
 def log_message(direction: str, message: JSON, method: str) -> None:

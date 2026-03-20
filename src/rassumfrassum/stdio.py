@@ -5,9 +5,7 @@ On Windows, this is unfortunately more complicated
 
 import asyncio
 import platform
-import socket
 import sys
-import threading
 
 
 async def create_stdin_reader() -> asyncio.StreamReader:
@@ -26,7 +24,7 @@ async def create_stdin_reader() -> asyncio.StreamReader:
                 """Blocking read1 from stdin buffer - reads available data."""
                 try:
                     # read1() reads whatever is available, doesn't block for full buffer
-                    return sys.stdin.buffer.read1(4096)
+                    return sys.stdin.buffer.read1(4096)  # ty:ignore[unresolved-attribute]
                 except Exception:
                     return b''
 
@@ -98,7 +96,7 @@ async def create_stdout_writer() -> asyncio.StreamWriter:
 
     if platform.system() == 'Windows':
         # Windows: Use custom wrapper with run_in_executor
-        return _WindowsStdoutWriter(loop)
+        return _WindowsStdoutWriter(loop)  # ty:ignore[invalid-return-type]
     else:
         # Unix: Direct connection works fine
         transport, protocol = await loop.connect_write_pipe(
