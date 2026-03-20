@@ -74,11 +74,7 @@ def log_message(direction: str, message: JSON, method: str) -> None:
     prefix = method
     if id is not None:
         prefix += f"[{id}]"
-
-    # Format: [timestamp] --> method_name {...json...}
-    # json_str = json.dumps(message, ensure_ascii=False)
-    json_str = json.dumps(message).decode('utf8')
-    event(f"{direction} {prefix} {json_str}")
+    event(direction, prefix, message)
 
 
 async def forward_server_stderr(proc: InferiorProcess) -> None:

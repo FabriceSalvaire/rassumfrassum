@@ -1,6 +1,10 @@
 import sys
 from datetime import datetime
-from enum import IntEnum
+from enum import IntEnum, StrEnum
+
+import orjson as json
+
+from .json import JSON
 
 # Type aliases for presets
 ServerCommand = list[str]
@@ -16,9 +20,20 @@ class LogLevel(IntEnum):
     DEBUG = 4  # rassum (aggregator) / frassum (LSP)
     TRACE = 5  # unused
 
+class Ansi(StrEnum):
+    # Basic set of ANSI Sequence
+    RESET = '\x1b[0m'
+    RED = '\x1b[1;31m'
+    GREEN = '\x1b[1;32m'
+    YELLOW = '\x1b[1;33m'
+    BLUE = '\x1b[1;34m'
+    MAGENTA = '\x1b[1;35m'
+    CYAN = '\x1b[1;36m'
+
 # Global settings
 _current_log_level = LogLevel.EVENT
 _max_log_length = 4000
+_pretty_event: str | None = None
 
 def set_log_level(level: int) -> None:
     """Set the global log level."""
@@ -34,19 +49,36 @@ def set_max_log_length(max_len: int) -> None:
     global _max_log_length
     _max_log_length = max_len
 
-def _truncate(s: str) -> str:
+def set_pretty_event(value: str) -> None:
+    """Set pretty event."""
+    global _pretty_event
+    _pretty_event = value if value != 'none' else None
+
+def _truncate(s: bytes) -> bytes:
     """Internal: truncate string if needed."""
     if _max_log_length <= 0 or len(s) <= _max_log_length:
         return s
-    return f"{s[:_max_log_length]}... (truncated, {len(s)} bytes total)"
+    return s[:_max_log_length] + f'... (truncated, {len(s)} bytes total)\n'.encode()
 
-def _log(prefix: str, s: str, min_level: int) -> None:
+def _log(prefix: str, message: str, level: LogLevel, bmessage: bytes = b'') -> None:
     """Internal: common logging implementation."""
-    if _current_log_level < min_level:
+    if _current_log_level < level:
         return
     now = datetime.now()
     timestamp = now.strftime("%H:%M:%S.%f")[:-3]
-    print(f"{prefix}[{timestamp}] {_truncate(s)}", file=sys.stderr)
+    if _pretty_event == 'ansi':
+        # WARNING: actually Emacs Eglot stderr buffer don't support ANSI sequence
+        umessage = f"{Ansi.RED}{prefix}{Ansi.RESET}[{Ansi.BLUE}{timestamp}{Ansi.RESET}] {message}"
+    else:
+        umessage = f"{prefix}[{timestamp}] {message}"
+    # NOTE: we use the bmessage trick because orjson dumps to bytes
+    _ = _truncate(
+        umessage.encode('utf8')
+        + bmessage
+        + b'\n'  # os.linesep
+    )
+    sys.stderr.buffer.write(_)
+
 
 def info(s: str):
     """Log info-level message (high-level events, lifecycle)."""
@@ -64,9 +96,20 @@ def warn(s: str):
     """Log warning message."""
     _log("W", "WARN: " + s, LogLevel.WARN)
 
-def event(s: str):
+def event(direction: str, prefix: str, data: JSON):
     """Log JSONRPC protocol event."""
-    _log("e", s, LogLevel.EVENT)
+    if _pretty_event == 'ansi':
+        umessage = f"{Ansi.GREEN}{direction} {Ansi.YELLOW}{prefix} {Ansi.RESET}"
+    else:
+        umessage = f"{direction} {prefix} "
+    # JSONRPC 'textDocument/semanticTokens/full' message is mainly a long list of integers
+    indent = 'semanticTokens' not in prefix and _pretty_event is not None
+    bmessage = json.dumps(
+        data,
+        option=json.OPT_INDENT_2 if indent else None,
+    )
+    # Format: [timestamp] --> method_name {...json...}
+    _log("e", umessage, LogLevel.EVENT, bmessage)
 
 # Alias for backward compatibility
 log = info

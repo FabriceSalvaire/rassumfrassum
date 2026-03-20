@@ -15,6 +15,7 @@ from .util import (
     log,
     set_log_level,
     set_max_log_length,
+    set_pretty_event,
 )
 
 
@@ -115,12 +116,20 @@ def main(argv=None) -> None:
         metavar='N',
         help='Maximum log message length in bytes; 0 for unlimited (default: 4000).',
     )
+    parser.add_argument(
+        '--pretty-event',
+        type=str,
+        choices=['none', 'indent', 'ansi'],
+        default='none',
+        help='Pretty print JSONRPC events',
+    )
     opts = parser.parse_args(rass_args)
 
     # Set log level based on argument
     log_level_map = LogLevel.__members__
     set_log_level(log_level_map[opts.log_level.upper()])
     set_max_log_length(opts.max_log_length)
+    set_pretty_event(opts.pretty_event)
 
     # Load preset if specified
     preset_logic_class = None
