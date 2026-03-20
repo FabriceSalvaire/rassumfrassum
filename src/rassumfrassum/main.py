@@ -72,10 +72,14 @@ def main(argv=None) -> None:
         '--version', action='version', version=f'%(prog)s {__version__}'
     )
     parser.add_argument(
-        'preset', nargs='?', help='Preset name or path to preset file'
+        'preset',
+        nargs='?',
+        help='Preset name or path to preset file',
     )
     parser.add_argument(
-        '--quiet-server', action='store_true', help='Suppress server\'s stderr.'
+        '--quiet-server',
+        action='store_true',
+        help='Suppress server\'s stderr.',
     )
     parser.add_argument(
         '--delay-ms',
