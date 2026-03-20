@@ -1,0 +1,22 @@
+####################################################################################################
+
+import argparse
+from pathlib import Path
+
+####################################################################################################
+
+parser = argparse.ArgumentParser(
+    prog='prettify',
+    description='Prettify LSP logs',
+    epilog='',
+)
+parser.add_argument(
+    'filename',
+    type=Path,
+)
+args = parser.parse_args()
+
+####################################################################################################
+
+# input_path = Path(args.filename)
+print(args.filename)
