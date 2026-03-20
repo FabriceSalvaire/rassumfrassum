@@ -11,9 +11,6 @@ import traceback
 from dataclasses import dataclass, field
 from typing import cast
 
-# import json
-import orjson as json
-
 from .frassum import DirectResponse, PayloadItem, Server
 from .json import JSON
 from .json import read_message as read_lsp_message
