@@ -3,7 +3,3 @@ def servers():
         ['basedpyright-langserver', '--stdio'],
         ['ruff', 'server']
     ]
-
-
-
-

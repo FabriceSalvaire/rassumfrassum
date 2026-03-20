@@ -6,7 +6,3 @@ def servers():
         ['ty', 'server'],
         ['ruff', 'server']
     ]
-
-
-
-
