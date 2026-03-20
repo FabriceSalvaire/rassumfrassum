@@ -509,75 +509,72 @@ class LspLogic:
         # Otherwise, skip errors and aggregate successful responses
         items = [item for item in items if (not item.is_error) and item.payload]
 
-        if method in (
-            'textDocument/definition',
-            'textDocument/typeDefinition',
-            'textDocument/implementation',
-            'textDocument/declaration',
-            'textDocument/references',
-        ):
-            res = reduce_maybe(
-                items,
-                lambda acc, item: self._merge_locations(
-                    acc, cast(JSON, item.payload), item.server
-                ),
-                [],
-            )
+        match method:
+            case 'textDocument/definition' | \
+                 'textDocument/typeDefinition' | \
+                 'textDocument/implementation' | \
+                 'textDocument/declaration' | \
+                 'textDocument/references':
+                res = reduce_maybe(
+                   items,
+                   lambda acc, item: self._merge_locations(
+                       acc, cast(JSON, item.payload), item.server
+                   ),
+                   [],
+                )
 
-        elif method == 'textDocument/diagnostic':
-            all_items = []
-            for item in items:
-                p = cast(JSON, item.payload)
-                diagnostics = p.get('items', [])
-                _add_source_attribution(diagnostics, item.server)
-                all_items.extend(diagnostics)
-            # FIXME: JT@2026-01-05: we elide any 'resultId', which
-            # means we're missing out on that optimization.  Not too
-            # serious if we can convince the client to support
-            # streaming, which should support 'resultId'.
-            res = {'items': all_items, 'kind': "full"}
+            case 'textDocument/diagnostic':
+                all_items = []
+                for item in items:
+                    p = cast(JSON, item.payload)
+                    diagnostics = p.get('items', [])
+                    _add_source_attribution(diagnostics, item.server)
+                    all_items.extend(diagnostics)
+                # FIXME: JT@2026-01-05: we elide any 'resultId', which
+                # means we're missing out on that optimization.  Not too
+                # serious if we can convince the client to support
+                # streaming, which should support 'resultId'.
+                res = {'items': all_items, 'kind': "full"}
 
-        elif method == 'textDocument/codeAction':
-            res = reduce_maybe(
-                items,
-                lambda acc, item: acc + (cast(list, item.payload) or []),
-                [],
-            )
+            case 'textDocument/codeAction':
+                res = reduce_maybe(
+                    items,
+                    lambda acc, item: acc + (cast(list, item.payload) or []),
+                    [],
+                )
 
-        elif method == 'textDocument/completion':
+            case 'textDocument/completion':
+                def normalize(x):
+                    return x if isinstance(x, dict) else {'items': x}
+                # FIXME: Deep merging CompletionList properties is wrong
+                # for many fields (e.g., isIncomplete should probably be OR'd)
+                res = reduce_maybe(
+                    items,
+                    lambda acc, item: dmerge(acc, normalize(item.payload)),
+                    {},
+                )
 
-            def normalize(x):
-                return x if isinstance(x, dict) else {'items': x}
+            case 'initialize':
+                res = reduce_maybe(
+                    items,
+                    lambda acc, item: self._merge_initialize_payloads(
+                        acc, cast(JSON, item.payload), item.server
+                    ),
+                    {},
+                )
+                # In streaming mode, advertise our custom streaming capability
+                if self.opts.stream_diagnostics and not is_error:
+                    res['capabilities']['$streamingDiagnosticsProvider'] = True
 
-            # FIXME: Deep merging CompletionList properties is wrong
-            # for many fields (e.g., isIncomplete should probably be OR'd)
-            res = reduce_maybe(
-                items,
-                lambda acc, item: dmerge(acc, normalize(item.payload)),
-                {},
-            )
+            case 'shutdown':
+                res = {}
 
-        elif method == 'initialize':
-            res = reduce_maybe(
-                items,
-                lambda acc, item: self._merge_initialize_payloads(
-                    acc, cast(JSON, item.payload), item.server
-                ),
-                {},
-            )
-            # In streaming mode, advertise our custom streaming capability
-            if self.opts.stream_diagnostics and not is_error:
-                res['capabilities']['$streamingDiagnosticsProvider'] = True
-
-        elif method == 'shutdown':
-            res = {}
-
-        else:
-            res = reduce_maybe(
-                items,
-                lambda acc, item: dmerge(acc, cast(JSON, item.payload)),
-                {},
-            )
+            case _:
+                res = reduce_maybe(
+                    items,
+                    lambda acc, item: dmerge(acc, cast(JSON, item.payload)),
+                    {},
+                )
 
         return (res, is_error)
 
@@ -792,8 +789,7 @@ class LspLogic:
 
 def _add_source_attribution(diags, server):
     for d in diags:
-        if 'source' not in d:
-            d['source'] = server.name
+        d.setdefault('source', server.name)
 
 
 def _process_watcher(watcher: JSON) -> list[str]:
