@@ -3,10 +3,11 @@ LSP-specific message routing and merging logic.
 """
 
 import asyncio
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from functools import reduce
 from pathlib import PurePosixPath
-from typing import cast, Callable, Awaitable, Optional
+from typing import cast
 from urllib.parse import unquote, urlparse
 
 from .json import JSON

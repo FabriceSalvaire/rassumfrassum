@@ -6,7 +6,8 @@ import asyncio
 import inspect
 import os
 import sys
-from typing import Callable, cast
+from collections.abc import Callable
+from typing import cast
 
 from .json import JSON, read_message, write_message, write_message_sync
 from .stdio import create_stdin_reader, create_stdout_writer
@@ -232,7 +233,7 @@ class LspTestEndpoint:
                 timeout=timeout_sec
             )
             raise AssertionError(f"Expected no message, but got: {msg}")
-        except asyncio.TimeoutError:
+        except TimeoutError:
             # This is what we expect - no message arrived
             pass
 
@@ -379,7 +380,7 @@ def run_toy_server(
         capabilities = {}
 
     # Default handlers
-    default_request_handlers: dict[str, 'Callable[[int, JSON | None], JSON | None]'] = {
+    default_request_handlers: dict[str, Callable[[int, JSON | None], JSON | None]] = {
         'initialize': lambda msg_id, params: {
             'capabilities': capabilities,
             'serverInfo': {'name': name, 'version': version}
