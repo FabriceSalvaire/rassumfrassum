@@ -68,9 +68,9 @@ def load_preset(name_or_path: str) -> PresetResult:
     )
 
 
-def _load_preset_from_file(filepath: str) -> Any:
+def _load_preset_from_file(filepath: Path | str) -> Any:
     """Load from external Python file using importlib.util."""
-    abs_path = os.path.abspath(filepath)
+    abs_path = Path(filepath).absolute()
 
     spec = importlib.util.spec_from_file_location("_preset_module", abs_path)
     if spec is None or spec.loader is None:
@@ -89,6 +89,6 @@ def _load_preset_from_bundle(name: str) -> Any:
     if presets_spec is None or presets_spec.origin is None:
         raise FileNotFoundError("Cannot find rassumfrassum.presets package")
 
-    presets_dir = os.path.dirname(presets_spec.origin)
-    preset_path = os.path.join(presets_dir, f'{name}.py')
+    presets_dir = Path(presets_spec.origin).parent
+    preset_path = presets_dir / f'{name}.py'
     return _load_preset_from_file(preset_path)
