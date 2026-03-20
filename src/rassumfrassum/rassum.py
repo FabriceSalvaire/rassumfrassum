@@ -67,9 +67,7 @@ class AggregationState:
 
 
 def log_message(direction: str, message: JSON, method: str) -> None:
-    """
-    Log a JSONRPC message to stderr with extra indications
-    """
+    """Log a JSONRPC message to stderr with extra indications."""
     id = message.get("id")
     prefix = method
     if id is not None:
@@ -80,9 +78,7 @@ def log_message(direction: str, message: JSON, method: str) -> None:
 
 
 async def forward_server_stderr(proc: InferiorProcess) -> None:
-    """
-    Forward server's stderr to our stderr, with appropriate prefixing.
-    """
+    """Forward server's stderr to our stderr, with appropriate prefixing."""
     try:
         while True:
             line = await proc.stderr.readline()
@@ -300,9 +296,7 @@ async def run_multiplexer(
         return (is_error, response_payload)
 
     async def notify_server(server: Server, method: str, payload: JSON) -> None:
-        """
-        Send a notification to a server (for use by logic layer).
-        """
+        """Send a notification to a server (for use by logic layer)."""
         if shutting_down:
             debug(f"Skipping notification to server (shutting down): {method}")
             return
