@@ -38,9 +38,33 @@ pythonVersion = "3.13"
 
 [tool.ruff]
 target-version = "py313"
-line-length = 80
+# line-length = 80
+line-length = 100
 
 [tool.ruff.format]
 quote-style = "preserve"
 indent-style = "space"
 docstring-code-format = false
+
+[tool.ruff.lint]
+preview = true
+# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
+# McCabe complexity (`C901`) by default.
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+]
+ignore = [
+    "E302",  # blank-lines-top-level
+    "E305", # blank-lines-after-function-or-class
+]
